@@ -86,7 +86,7 @@ async def get_rabbitmq_connection(queue_name: str) -> tuple[AbstractRobustConnec
                 port=settings.RABBITMQ_AMQP_PORT,
             )
             channel: AbstractChannel = await connection.channel()
-            # await channel.declare_queue(queue_name, durable=True)
+            # await channel.declare_queue(QUEUE_NAME, durable=True)
             await safe_declare_queue(channel, queue_name, durable=True) # Safely declares a RabbitMQ queue
             logging.info("RabbitMQ connected!")
             return connection, channel

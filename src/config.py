@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     rabbitmq_user: str
     rabbitmq_pass: str
     rabbitmq_vhost: str
-    queue_name: str
+    QUEUE_NAME: str
     RABBITMQ_HOST: str
     rabbitmq_api_port: int
     RABBITMQ_AMQP_PORT: int
