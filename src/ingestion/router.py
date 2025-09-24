@@ -39,7 +39,7 @@ async def post(request: RequestModel, app_request: Request):
         await send_message_to_rabbitmq(
             channel=channel,
             queue_name=settings.QUEUE_NAME,
-            message=payload.model_dump()
+            message=payload.model_dump(mode="json")
         )
         logging.info(f"Message sent: {payload.model_dump()}")
         return {"status": "sent", "number": 12}
