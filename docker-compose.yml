@@ -1,3 +1,6 @@
+# docker compose --env-file dev.env config
+# docker compose up -d
+# docker compose --env-file dev.env up -d
 
 name: fastapi-rabbitmq-project
 
@@ -10,8 +13,8 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}
     ports:
-      - "5672:5672"   # AMQP
-      - "15672:15672" # Management UI
+      - "5672:5672"   # AMQP Post (Advanced Message Queuing Protocol)
+      - "15672:15672" # Management UI HTTP (RabbitMQ Management Web Interface)
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     #  - ./queue_init.sh:/queue_init.sh
@@ -21,7 +24,7 @@ services:
 
   fastapi:
     build: .
-    container_name: fastapi-service
+    container_name: fastapi-process_tag
     environment:
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_USER: ${RABBITMQ_USER}
