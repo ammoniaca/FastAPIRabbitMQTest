@@ -1,10 +1,7 @@
+import asyncio
 from fastapi import APIRouter, Request, HTTPException
-from datetime import datetime, timezone
 from src.ingestion.schemas import RequestModel
-from src.config import settings
-from src.producer.producer import send_message_to_rabbitmq
-from src.producer.schemas import PayloadModel
-from src.producer.random_string_generator import random_string_generator
+from src.producer.tasks import periodic_sender
 import logging
 
 
@@ -24,25 +21,38 @@ router = APIRouter(
 @router.post("/")
 async def post(request: RequestModel, app_request: Request):
     """
-    Receives a number via POST and sends it to RabbitMQ.
+        Starts sending messages to RabbitMQ every n seconds.
     """
     try:
-        random_string = random_string_generator(min_length=request.range.min, max_length=request.range.max)
-        # generate message to rabbitmq
-        payload = PayloadModel(
-            queue_name=settings.queue_name,
-            process_name=request.process_name,
-            random_string=random_string,
-            created_at=datetime.now(timezone.utc)
-        )
         channel = app_request.app.state.rabbit_channel
-        await send_message_to_rabbitmq(
+        asyncio.create_task(periodic_sender(
             channel=channel,
-            queue_name=settings.queue_name,
-            message=payload.model_dump(mode="json")
+            process_name=request.process_name,
+            min_len=request.range.min,
+            max_len=request.range.max)
         )
-        logging.info(f"Message sent: {payload.model_dump()}")
-        return {"status": "sent", "message": 124}
+        return {"status": "scheduled"}
     except Exception as e:
-        logging.error(f"Error sending message: {e}")
-        raise HTTPException(status_code=500, detail="Could not send message to RabbitMQ")
+        logging.error(f"Error scheduling periodic sender: {e}")
+        raise HTTPException(status_code=500, detail="Could not schedule periodic sender")
+
+    # try:
+    #     random_string = random_string_generator(min_length=request.range.min, max_length=request.range.max)
+    #     # generate message to rabbitmq
+    #     payload = PayloadModel(
+    #         queue_name=settings.queue_name,
+    #         process_name=request.process_name,
+    #         random_string=random_string,
+    #         created_at=datetime.now(timezone.utc)
+    #     )
+    #     channel = app_request.app.state.rabbit_channel
+    #     await send_message_to_rabbitmq(
+    #         channel=channel,
+    #         queue_name=settings.queue_name,
+    #         message=payload.model_dump(mode="json")
+    #     )
+    #     logging.info(f"Message sent: {payload.model_dump()}")
+    #     return {"status": "sent", "message": 124}
+    # except Exception as e:
+    #     logging.error(f"Error sending message: {e}")
+    #     raise HTTPException(status_code=500, detail="Could not send message to RabbitMQ")
