@@ -46,12 +46,11 @@ async def periodic_sender(channel, process_name: str, min_len: int, max_len: int
 
     """
     try:
-        flag_test = 0
         while True:
             random_string = random_string_generator(min_length=min_len, max_length=max_len)
             payload = PayloadModel(
                 queue_name=settings.queue_name,
-                process_name="-".join([process_name, str(flag_test)]),
+                process_name=process_name,
                 random_string=random_string,
                 created_at=datetime.now(timezone.utc)
             )
@@ -62,6 +61,5 @@ async def periodic_sender(channel, process_name: str, min_len: int, max_len: int
             )
             logging.info(f"Message sent periodically: {payload.model_dump()}")
             await asyncio.sleep(WAIT_TIME)  # wait for a certain period of time
-            flag_test +=1
     except Exception as e:
         logging.error(f"Error in periodic sender: {e}")
