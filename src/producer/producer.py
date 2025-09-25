@@ -11,8 +11,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 
-SECONDS_WAIT: int = 5
-MAX_RETRIES = 30  # massimo tentativi
 
 async def safe_declare_queue(channel: AbstractChannel, queue_name: str, durable=True):
     """
@@ -39,7 +37,10 @@ async def safe_declare_queue(channel: AbstractChannel, queue_name: str, durable=
         If the queue exists with different parameters or if there is a channel error.
     """
     try:
-        await channel.declare_queue(queue_name, durable=durable)
+        await channel.declare_queue(
+            queue_name,
+            durable=durable
+        )
         logging.info(f"Queue '{queue_name}' declared successfully or already exists.")
     except exceptions.ChannelClosed as e:
         logging.error(f"Cannot declare queue '{queue_name}': {e}")
@@ -79,7 +80,7 @@ async def get_rabbitmq_connection(queue_name: str) -> tuple[AbstractRobustConnec
     - The queue is declared as durable to persist messages in RabbitMQ even if the server restarts.
     """
     retries = 0
-    while retries < MAX_RETRIES:
+    while retries < settings.retry_limit:
         try:
             connection: AbstractRobustConnection = await connect_robust(
                 host=settings.rabbitmq_host,
@@ -93,12 +94,12 @@ async def get_rabbitmq_connection(queue_name: str) -> tuple[AbstractRobustConnec
         except exceptions.AMQPConnectionError:
             retries += 1
             logging.warning(
-                f"RabbitMQ not ready, retrying in {SECONDS_WAIT} seconds... ({retries}/{MAX_RETRIES})"
+                f"RabbitMQ not ready, retrying in {settings.retry_delay} seconds... ({retries}/{settings.retry_limit})"
             )
-            await asyncio.sleep(SECONDS_WAIT)
+            await asyncio.sleep(settings.retry_delay)
 
-    logging.error(f"Could not connect to RabbitMQ after {MAX_RETRIES} retries")
-    raise ConnectionError(f"Could not connect to RabbitMQ after {MAX_RETRIES} retries")
+    logging.error(f"Could not connect to RabbitMQ after {settings.retry_limit} retries")
+    raise ConnectionError(f"Could not connect to RabbitMQ after {settings.retry_limit} retries")
 
 async def send_message_to_rabbitmq(channel: AbstractChannel, queue_name: str, message: dict):
     """

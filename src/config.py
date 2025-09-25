@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     rabbitmq_host: str
     rabbitmq_api_port: int
     rabbitmq_amqp_port: int
+    retry_limit: int
+    retry_delay: int
+
     model_config=SettingsConfigDict(env_file=env_file_path)
 
 settings = Settings()
