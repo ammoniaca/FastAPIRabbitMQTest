@@ -26,6 +26,7 @@ services:
   fastapi:
     build: .
     container_name: fastapi-demo
+    image: myfastapiapp:1.0
     environment:
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_USER: ${RABBITMQ_USER}
