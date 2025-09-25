@@ -82,8 +82,8 @@ async def get_rabbitmq_connection(queue_name: str) -> tuple[AbstractRobustConnec
     while retries < MAX_RETRIES:
         try:
             connection: AbstractRobustConnection = await connect_robust(
-                host=settings.RABBITMQ_HOST,
-                port=settings.RABBITMQ_AMQP_PORT,
+                host=settings.rabbitmq_host,
+                port=settings.rabbitmq_amqp_port,
             )
             channel: AbstractChannel = await connection.channel()
             # await channel.declare_queue(QUEUE_NAME, durable=True)

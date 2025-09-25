@@ -15,7 +15,7 @@ logging.basicConfig(
 @asynccontextmanager
 async def lifespan_handler(fastapi_app: FastAPI):
     # Startup: connect to RabbitMQ
-    fastapi_app.state.rabbit_connection, fastapi_app.state.rabbit_channel = await get_rabbitmq_connection(settings.QUEUE_NAME)
+    fastapi_app.state.rabbit_connection, fastapi_app.state.rabbit_channel = await get_rabbitmq_connection(settings.queue_name)
     logging.info("RabbitMQ connection established")
     yield
     # Shutdown: close connection

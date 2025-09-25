@@ -38,11 +38,11 @@ async def post(request: RequestModel, app_request: Request):
         channel = app_request.app.state.rabbit_channel
         await send_message_to_rabbitmq(
             channel=channel,
-            queue_name=settings.QUEUE_NAME,
+            queue_name=settings.queue_name,
             message=payload.model_dump(mode="json")
         )
         logging.info(f"Message sent: {payload.model_dump()}")
-        return {"status": "sent", "number": 12}
+        return {"status": "sent", "message": 124}
     except Exception as e:
         logging.error(f"Error sending message: {e}")
         raise HTTPException(status_code=500, detail="Could not send message to RabbitMQ")

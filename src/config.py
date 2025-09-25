@@ -13,10 +13,10 @@ class Settings(BaseSettings):
     rabbitmq_user: str
     rabbitmq_pass: str
     rabbitmq_vhost: str
-    QUEUE_NAME: str
-    RABBITMQ_HOST: str
+    queue_name: str
+    rabbitmq_host: str
     rabbitmq_api_port: int
-    RABBITMQ_AMQP_PORT: int
+    rabbitmq_amqp_port: int
     model_config=SettingsConfigDict(env_file=env_file_path)
 
 settings = Settings()

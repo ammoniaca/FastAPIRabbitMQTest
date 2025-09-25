@@ -1,6 +1,7 @@
 # docker compose --env-file dev.env config
 # docker compose up -d
 # docker compose --env-file dev.env up -d
+# docker compose --env-file dev.env up -d --build
 
 name: fastapi-rabbitmq-project
 
