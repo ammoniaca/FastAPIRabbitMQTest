@@ -12,8 +12,7 @@ class IntRanges(BaseModel):
         return self
 
 class RequestModel(BaseModel):
-    queue_name: str = Field(...)
-    process_tag: str = Field(...)
+    process_name: str = Field(...)
     range: IntRanges = Field(...)
 
     def __getitem__(self, item):

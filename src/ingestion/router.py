@@ -30,8 +30,8 @@ async def post(request: RequestModel, app_request: Request):
         random_string = random_string_generator(min_length=request.range.min, max_length=request.range.max)
         # generate message to rabbitmq
         payload = PayloadModel(
-            queue_name=request.queue_name,
-            process_tag=request.process_tag,
+            queue_name=settings.queue_name,
+            process_name=request.process_name,
             random_string=random_string,
             created_at=datetime.now(timezone.utc)
         )

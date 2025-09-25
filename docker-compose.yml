@@ -25,7 +25,7 @@ services:
 
   fastapi:
     build: .
-    container_name: fastapi-process_tag
+    container_name: fastapi-process_name
     environment:
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_USER: ${RABBITMQ_USER}
