@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     rabbitmq_amqp_port: int
     retry_limit: int
     retry_delay: int
+    periodic_task_interval:int
 
     model_config=SettingsConfigDict(env_file=env_file_path)
 

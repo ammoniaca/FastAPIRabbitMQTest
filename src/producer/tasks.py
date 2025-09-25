@@ -12,7 +12,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 
-WAIT_TIME = 10
 
 async def periodic_sender(channel, process_name: str, min_len: int, max_len: int):
     """
@@ -60,6 +59,6 @@ async def periodic_sender(channel, process_name: str, min_len: int, max_len: int
                 message=payload.model_dump(mode="json")
             )
             logging.info(f"Message sent periodically: {payload.model_dump()}")
-            await asyncio.sleep(WAIT_TIME)  # wait for a certain period of time
+            await asyncio.sleep(settings.periodic_task_interval)  # wait for a certain period of time
     except Exception as e:
         logging.error(f"Error in periodic sender: {e}")

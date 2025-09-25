@@ -3,7 +3,7 @@
 # docker compose --env-file dev.env up -d
 # docker compose --env-file dev.env up -d --build
 
-name: fastapi-rabbitmq-project
+name: fastapi-rabbitmq-demo-project
 
 services:
   rabbitmq:
@@ -25,7 +25,7 @@ services:
 
   fastapi:
     build: .
-    container_name: fastapi-process_name
+    container_name: fastapi-demo
     environment:
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_USER: ${RABBITMQ_USER}

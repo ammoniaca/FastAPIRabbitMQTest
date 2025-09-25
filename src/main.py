@@ -24,8 +24,15 @@ async def lifespan_handler(fastapi_app: FastAPI):
 
 app = FastAPI(
     title=settings.app_title,
-    lifespan=lifespan_handler
+    lifespan=lifespan_handler,
+    docs_url="/api/v1/docs", # Swagger UI
+    redoc_url="/api/v1/redoc",  # ReDoc
+    openapi_url="/api/v1/openapi.json"
 )
+
+@app.get("/")
+async def root():
+    return {"message": "demo!"}
 
 app.include_router(controller_router)
 app.include_router(rabbitmq_router)
