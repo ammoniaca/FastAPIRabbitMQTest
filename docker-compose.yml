@@ -2,10 +2,31 @@
 # docker compose up -d
 # docker compose --env-file dev.env up -d
 # docker compose --env-file dev.env up -d --build
+# docker compose -f docker-compose.yml --env-file dev.env up -d (SOLO DOCKER COMPOSE)
+# http://rabbit.localhost
+# http://fastapi.localhost/
 
 name: fastapi-rabbitmq-demo-project
 
 services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"   # Solo per sviluppo (dashboard su :8080 senza auth)
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"      # ingress HTTP
+      - "8080:8080"  # dashboard traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - service-network
+    restart: always
+
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: rabbit-fastapi
@@ -13,15 +34,24 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}
-    ports:
-      - "5672:5672"   # AMQP Post (Advanced Message Queuing Protocol)
-      - "15672:15672" # Management UI HTTP (RabbitMQ Management Web Interface)
+#    ports:
+#      - "5672:5672"   # AMQP Post (Advanced Message Queuing Protocol)
+#      - "15672:15672" # Management UI HTTP (RabbitMQ Management Web Interface)
+    healthcheck:
+      test: [ "CMD-SHELL", "rabbitmq-diagnostics -q ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    #  - ./queue_init.sh:/queue_init.sh
+    restart: always
     networks:
       - service-network
-    # command: ["sh", "/queue_init.sh"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rabbitmq.rule=Host(\"rabbit.localhost\")"
+      - "traefik.http.routers.rabbitmq.entrypoints=web"
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
   fastapi:
     build: .
@@ -33,15 +63,23 @@ services:
       RABBITMQ_PASS: ${RABBITMQ_PASS}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST}
       RABBITMQ_API_PORT: ${RABBITMQ_API_PORT}
-    ports:
-      - "8000:8000"
+#    ports:
+#      - "8000:8000"
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+    restart: always
     networks:
       - service-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fastapi.rule=Host(\"fastapi.localhost\")"
+      - "traefik.http.routers.fastapi.entrypoints=web"
+      - "traefik.http.services.fastapi.loadbalancer.server.port=8000"
 
 volumes:
   rabbitmq_data:
+    name: fastapi_rabbitmq_demo_volume
 
 networks:
   service-network:

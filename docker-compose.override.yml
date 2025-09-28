@@ -1,0 +1,63 @@
+#docker run -d `
+#  --name fastapi-demo-3 `
+#  --network fastapi_rabbit_network `
+#  --env-file dev.env `
+#  --label "traefik.enable=true" `
+#  --label "traefik.http.routers.fastapi3.rule=Host(\"fastapi3.localhost\")" `
+#  --label "traefik.http.routers.fastapi3.entrypoints=web" `
+#  --label "traefik.http.services.fastapi3.loadbalancer.server.port=8000" `
+#  myfastapiapp:1.0 uvicorn src.main:app --host 0.0.0.0 --port 8000
+
+# docker run -d --name fastapi-demo-1234 --network fastapi_rabbit_network --env-file dev.env --label "traefik.enable=true" --label "traefik.http.routers.fastapi1234.rule=Host(\"fastapi1234.localhost\")" --label "traefik.http.routers.fastapi1234.entrypoints=web" --label "traefik.http.services.fastapi1234.loadbalancer.server.port=8000" myfastapiapp:1.0 uvicorn src.main:app --host 0.0.0.0 --port 8000
+# http://fastapi1234.localhost/
+# docker run -d --name fastapi-demo-3 --network fastapi_rabbit_network --env-file dev.env --label "traefik.enable=true" --label "traefik.http.routers.fastapi3.rule=Host(\"fastapi3.localhost\")" --label "traefik.http.routers.fastapi3.entrypoints=web" --label "traefik.http.services.fastapi3.loadbalancer.server.port=8000" myfastapiapp:1.0 uvicorn src.main:app --host 0.0.0.0 --port 8000
+# http://fastapi3.localhost/
+# docker run -d --name fastapi-demo-42 --network fastapi_rabbit_network --env-file dev.env --label "traefik.enable=true" --label "traefik.http.routers.fastapi42.rule=Host(\"fastapi42.localhost\")" --label "traefik.http.routers.fastapi42.entrypoints=web" --label "traefik.http.services.fastapi42.loadbalancer.server.port=8000" myfastapiapp:1.0
+# http://fastapi42.localhost/
+
+
+#docker compose \
+#  --env-file dev.env \
+#  -f docker-compose.yml \
+#  -f docker-compose.override.yml \
+#  up -d --build
+#
+# docker compose --env-file dev.env -f docker-compose.yml -f docker-compose.override.yml up -d
+# http://fastapi2.localhost/
+
+services:
+  fastapi2:
+    image: myfastapiapp:1.0
+    container_name: fastapi-demo-2
+    env_file:
+      - dev.env
+    networks:
+      - service-network
+#    ports:
+#      - "8001:8000"   # Espone il container all'host per test diretto
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fastapi2.rule=Host(\"fastapi2.localhost\")"
+      - "traefik.http.routers.fastapi2.entrypoints=web"
+      - "traefik.http.services.fastapi2.loadbalancer.server.port=8000"
+    restart: always
+
+networks:
+  service-network:
+    name: fastapi_rabbit_network  # coincide con la rete del docker-compose principale
+
+
+#services:
+#  fastapi2:
+#    image: myfastapiapp:1.0
+#    container_name: fastapi-demo-2
+#    env_file:
+#      - dev.env
+#    networks:
+#      - service-network
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.fastapi.rule=Host(`fastapi.localhost`)"
+#      - "traefik.http.routers.fastapi.entrypoints=web"
+#      - "traefik.http.services.fastapi.loadbalancer.server.port=8000"
+#    restart: always
